@@ -153,6 +153,8 @@ namespace CmdParser.Define
             //检查别名是否匹配
             foreach (var df in kvParams.Values)
             {
+                if (string.IsNullOrEmpty(df.epithet))
+                    continue;
                 if (df.epithet == epithet)
                 {
                     return df;
@@ -207,7 +209,10 @@ namespace CmdParser.Define
             subCommands.Add(name, sub);
             return sub;
         }
-
+        /// <summary>
+        /// 位置参数迭代器
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<PosParamDefine> PosParamDefines()
         {
             foreach (var df in posParams)
@@ -215,7 +220,10 @@ namespace CmdParser.Define
                 yield return df;
             }
         }
-
+        /// <summary>
+        /// 键值参数迭代器
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<KvParamDefine> KvParamDefines()
         {
             foreach (var df in kvParams.Values)

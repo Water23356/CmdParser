@@ -54,7 +54,11 @@ namespace CmdParser.Define
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"-{epithet} --{name}: {description}\n");
+            if (string.IsNullOrEmpty(epithet))
+            {
+                sb.Append($"-{epithet} ");
+            }
+            sb.Append($"--{name}: {description}\n");
             sb.Append($"\ttype: {type}\n");
             sb.Append($"\tdefault: {defaultValue}\n");
             if (isMark)
