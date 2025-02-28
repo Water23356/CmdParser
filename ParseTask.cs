@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿//#define TEST
 
 using CmdParser.Define;
 using CmdParser.SubParsers;

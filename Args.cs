@@ -1,4 +1,4 @@
-﻿//#define TEST
+﻿////#define TEST
 
 using CmdParser.Define;
 using System.Collections;
@@ -90,12 +90,15 @@ namespace CmdParser
                 if (!cstr.IsEmpty)
                 {
                     var result = executer.Execute(cstr.commandIndex);
+                    _Log($"填入未定参数: {arg.name}");
+                    _Log($"调用子指令: {cstr.commandIndex}");
                     arg!.value = result;
                     continue;
                 }
                 var vstr = arg.value.VarString;
                 if (!vstr.IsEmpty)
                 {
+                    _Log($"填入未定参数: {arg.name}");
                     arg!.value = executer.GetSubVarValue(vstr.index);
                 }
             }

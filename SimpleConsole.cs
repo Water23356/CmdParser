@@ -52,39 +52,6 @@ namespace CmdParser
                 return Value.Null;
             };
 
-            set.AddCommand("clear-mode", "设置控制台默认清除模式")
-                .AddParam(new PosParamDefine
-                {
-                    name = "state",
-                    description = "控制台的默认清除模式",
-                    defaultValue = true,
-                    type = "bool",
-                    isRequire = false,
-                })
-                .AddParam(new KvParamDefine
-                {
-                    name = "info",
-                    epithet = "-i",
-                    description = "显示当前信息(令当前设置失效)",
-                    defaultValue = false,
-                    type = "bool",
-                    isRequire = false,
-                    isMark = true,
-                    markValue = true,
-                })
-                .execute = (ce, args) =>
-                {
-                    if (args["info"].Bool)
-                    {
-                        MessageOutput.BroadcastLine($"当前清除模式: {defaultClear}");
-                    }
-                    else
-                    {
-                        defaultClear = args["state"].Bool;
-                    }
-                    return Value.Null;
-                };
-
             var varCommand = set.AddCommand("var", "环境变量指令");
             varCommand.AddSubCommand("list", "打印当前环境中的所有变量")
                 .execute = (ce, args) =>
@@ -142,7 +109,6 @@ namespace CmdParser
                         Clear();
                         MessageOutput.BroadcastLine("已清空定义变量");
                     }
-
                     return Value.Null;
                 };
         }

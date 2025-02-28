@@ -1,4 +1,5 @@
 ﻿using CmdParser.Define;
+using System.Text;
 
 namespace CmdParser
 {
@@ -13,6 +14,11 @@ namespace CmdParser
         public CommandDefine? define;
 
         /// <summary>
+        /// 原始字符串
+        /// </summary>
+        public string originString = string.Empty;
+
+        /// <summary>
         /// 指令名称
         /// </summary>
         public string name = string.Empty;
@@ -22,7 +28,7 @@ namespace CmdParser
         /// </summary>
         public string parentFullName = string.Empty;
 
-        public string fullName => parentFullName +' '+ name;
+        public string fullName => parentFullName + ' ' + name;
 
         /// <summary>
         /// 携带的参数组
@@ -50,6 +56,15 @@ namespace CmdParser
                 return define.Invoke(args, executer);
             }
             return null;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[Command]: ");
+            sb.Append($"originString='{originString}'");
+            sb.Append($"fullname='{fullName}'");
+            return sb.ToString();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿#define TEST
+﻿//#define TEST
+
 using CmdParser.Define;
 
 namespace CmdParser
@@ -90,7 +91,8 @@ namespace CmdParser
 
                 var command = task.Parse(commandSet, pop.Value);
                 if (command != null)
-                    commands[pop.Key] = command;
+                    command.originString = pop.Value;
+                commands[pop.Key] = command!;
             }
         }
 
@@ -131,6 +133,7 @@ namespace CmdParser
         /// <exception cref="ConvertException"></exception>
         public Value Execute(string index)
         {
+            _Log($"执行指令: {index}");
             if (commands.TryGetValue(index, out var command))
             {
                 var result = command.Invoke(this) ?? Value.Null;
@@ -154,6 +157,19 @@ namespace CmdParser
         {
             if (values.TryGetValue(index, out var value))
                 return value;
+            if (commands.ContainsKey(index))
+            {
+                _Log($"调用子指令: {index}");
+                try
+                {
+                    var result = Execute(index);
+                    return result;
+                }
+                catch(ParseException ex)
+                {
+                    MessageOutput.BroadcastLine($"子指令出错: index={index} info='{ex.Message}'");
+                }
+            }
             MessageOutput.BroadcastLine($"变量不存在: {index}");
             return Value.Null;
         }
@@ -180,26 +196,28 @@ namespace CmdParser
             commandStrings[key] = commandStr;
             return key;
         }
+
         /// <summary>
         /// 获取一个迭代器: 返回环境内的 变量名和变量值
         /// </summary>
         /// <returns></returns>
         public IEnumerable<(string, Value)> GetVarValues()
         {
-            foreach(var value in values)
+            foreach (var value in values)
             {
                 yield return (value.Key, value.Value);
             }
         }
+
         /// <summary>
         /// 获取一个迭代器: 返回环境内的 指令索引和指令串
         /// </summary>
         /// <returns></returns>
         public IEnumerable<(string, string)> GetCommandStrings()
         {
-            foreach (var value in commandStrings)
+            foreach (var command in commands)
             {
-                yield return (value.Key, value.Value);
+                yield return (command.Key, command.Value.originString);
             }
         }
 

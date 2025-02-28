@@ -123,7 +123,6 @@
 
         private void S3(char c)
         {
-            Console.WriteLine($"状态: {state} c={c}");
             if (splitStyle == SplitStyle.KeyValuePair)
             {
                 if (char.IsWhiteSpace(c)) return;//忽略

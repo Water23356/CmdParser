@@ -1,4 +1,4 @@
-﻿#define TEST
+﻿//#define TEST
 using System.Text;
 
 namespace CmdParser.Define
@@ -264,7 +264,7 @@ namespace CmdParser.Define
         private bool CheckHelp(ArgGroup? group)
         {
             if (group == null) return false;
-            if (group.Contains("help"))
+            if (!group.IsDefaultParam("help"))
             {
                 MessageOutput.BroadcastLine(GetHelpInfo());
                 return true;
@@ -344,10 +344,11 @@ namespace CmdParser.Define
             if (args == null)
                 args = new ArgGroup(this);
 
+            //先补全参数组
+            CheckArgGroup(args, executer);
+            //检查是否显示帮助, 显示帮助会中断指令继续执行
             if (CheckHelp(args))
                 return null;
-            CheckArgGroup(args, executer);
-
             try
             {
                 var result = execute?.Invoke(((executer != null) ? executer : new CommandExecuter()), args);

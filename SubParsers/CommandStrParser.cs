@@ -26,6 +26,7 @@
 
         public override void OnUpdate(char c)
         {
+            _Log($"state='{state}'");
             switch (state)
             {
                 case 1: S1(c); break;
@@ -59,7 +60,7 @@
             switch (c)
             {
                 case STR_CHAR:
-                    state = 3;
+                    Push(ParserBuilder.STRING_FIELD);
                     break;
 
                 case END:
