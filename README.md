@@ -144,9 +144,5 @@ console.ParseAndRun(input);
 
 
 
-
-
-
-
 ## 许可证
-[说明项目使用的许可证，例如 MIT 等，如果没有可以写暂未确定]
+MIT
