@@ -8,6 +8,7 @@ namespace CmdParser.SubParsers
         public CommandDefine? define { get; private set; }
         private int state = 0;
         //解析结构: xxx yyy yyy
+        // value 以分隔符结尾, body 以分隔符' '结尾
         //s1: 忽略空白符, x->push, 中断->pop
         //push->p1
         //p1: 未定义指令, p1->s2
@@ -82,6 +83,7 @@ namespace CmdParser.SubParsers
                     {
                         throw new UnknownCommandException(command);
                     }
+                    S2(c);
                     break;
 
                 case ParserBuilder.COMMAND_BODY:
@@ -118,18 +120,17 @@ namespace CmdParser.SubParsers
                         command.args.Add(arg);
                     }
                     _Log("参数添加完毕");
+                    S2(c);
                     break;
 
                 default:
                     throw new UnexpectedSubparserException(sub);
             }
-            if (c == END)
-                Pop();
         }
 
         public override void OnExit(char c)
         {
             SetTempValue(command);
-        }
+        } 
     }
 }

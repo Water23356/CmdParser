@@ -89,11 +89,7 @@ namespace CmdParser
                     return null;
                 }
             }
-            catch (TargetInvocationException ex)
-            {
-                return null;
-            }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }

@@ -4,6 +4,27 @@
     {
         public const char SPLIT_CHAR = ':';
         public const char SPLIT_CHAR2 = '=';
+
+        public const char SPLIT_CHAR3 = ' ';
+
+        public enum SplitStyle
+        {
+            /// <summary>
+            /// 键值之间以空格分隔
+            /// </summary>
+            Classic = 0,
+
+            /// <summary>
+            /// 键值之间以":"或者"="分隔
+            /// </summary>
+            KeyValuePair = 1,
+        }
+
+        /// <summary>
+        /// 分隔风格
+        /// </summary>
+        public static SplitStyle splitStyle = SplitStyle.KeyValuePair;
+
         private Arg arg = new Arg();
         private int state = 0;
         //解析结构: xxx=xxx
@@ -56,39 +77,86 @@
 
         private void S2(char c)
         {
-            if (char.IsWhiteSpace(c))
+            if (splitStyle == SplitStyle.KeyValuePair)
             {
-                Pop();
-                return;
-            }
-            switch (c)
-            {
-                case END:
+                if (char.IsWhiteSpace(c))
+                {
                     Pop();
-                    break;
+                    return;
+                }
+                switch (c)
+                {
+                    case END:
+                        Pop();
+                        break;
 
-                case SPLIT_CHAR:
-                case SPLIT_CHAR2:
+                    case SPLIT_CHAR:
+                    case SPLIT_CHAR2:
+                        state = 3;
+                        break;
+
+                    default:
+                        throw new FormatException(c, $"'{SPLIT_CHAR}'或者'{SPLIT_CHAR2}'");
+                }
+            }
+            else//Classic
+            {
+                if (char.IsWhiteSpace(c))
+                {
                     state = 3;
-                    break;
+                }
+                switch (c)
+                {
+                    case END:
+                        Pop();
+                        break;
 
-                default:
-                    throw new FormatException(c, $"'{SPLIT_CHAR}'或者'{SPLIT_CHAR2}'");
+                    case SPLIT_CHAR3:
+                        state = 3;
+                        break;
+
+                    default:
+                        throw new FormatException(c, $"{SPLIT_CHAR3}");
+                }
             }
         }
 
         private void S3(char c)
         {
-            if (char.IsWhiteSpace(c)) return;//忽略
-            switch (c)
+            Console.WriteLine($"状态: {state} c={c}");
+            if (splitStyle == SplitStyle.KeyValuePair)
             {
-                case END:
-                    throw new UnexpectedInterruptionException(c, task!.index);
+                if (char.IsWhiteSpace(c)) return;//忽略
+                switch (c)
+                {
+                    case END:
+                        throw new UnexpectedInterruptionException(c, task!.index);
 
-                default:
-                    Push(ParserBuilder.VALUE_FIELD);
-                    state = 4;
-                    break;
+                    default:
+                        Push(ParserBuilder.VALUE_FIELD);
+                        state = 4;
+                        break;
+                }
+            }
+            else//Classic
+            {
+                if (char.IsWhiteSpace(c)) return;//忽略
+                switch (c)
+                {
+                    case END:
+                        Pop();
+                        break;
+
+                    case CommandBodyParser.PARAM_HEAD://解析到新的参数头
+                        Pop();
+                        break;
+
+                    default:
+                        Push(ParserBuilder.VALUE_FIELD);
+                        state = 4;
+                        break;
+
+                }
             }
         }
 

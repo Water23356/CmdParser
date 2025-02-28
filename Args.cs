@@ -9,6 +9,9 @@ namespace CmdParser
     {
         public CommandDefine define { get; private set; }
 
+        public List<Value> posArgsRedundant { get; set; } = new List<Value>();
+        public Dictionary<string, Value> kvArgsRedundant { get; set; } = new Dictionary<string, Value>();
+
         public int Count => args.Count;
 
         public bool IsReadOnly => false;
@@ -22,12 +25,42 @@ namespace CmdParser
             posArgCount = 0;
         }
 
+        /// <summary>
+        /// 获取参数值
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="KeyNotFoundException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public Value this[string key]
         {
             get
             {
                 return args[key].value!;
             }
+        }
+
+        /// <summary>
+        /// 获取未定义的位置参数
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public Value GetUndefinedPosParam(int index)
+        {
+            return posArgsRedundant[index];
+        }
+
+        /// <summary>
+        /// 获取未定义的键值参数
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="KeyNotFoundException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public Value GetUndefinedKvParam(string key)
+        {
+            return kvArgsRedundant[key];
         }
 
         public bool Contains(string name)
@@ -63,31 +96,15 @@ namespace CmdParser
             {
                 var df = define.GetPosParamDefine(posArgCount++);//获取该位置上参数定义
                 if (df == null)//缺失参数定义
-                    throw new UndefinedPosArgException(define, posArgCount);
-
-                arg.name = df.name;
-                args[arg.name] = arg;
-                _Log($"添加参数: {arg}");
-            }
-            else if (arg.useEpithet)//别称选项参数
-            {
-                var df = define.GetKVParamDefineWithEpithet(arg.name);//获取选项参数定义
-
-                if (df == null)//缺失参数定义
-                    throw new UndefinedKVArgException(define, arg);
-
-                if (!arg.value.active)//如果参数的值未填入
                 {
-                    if (df.isMark)//标记型参数, 填入标记值
+                    if (define.allowPosParamRedundant)//允许冗余参数
                     {
-                        arg.name = df.name;
-                        arg.value = new Value(df.markValue);
-                        args[arg.name] = arg;
-                        _Log($"添加参数: {arg}");
+                        //冗余参数存入未定义组内
+                        posArgsRedundant.Add(arg.value);
                     }
-                    else//非标记参数则强制需要填入值
+                    else
                     {
-                        throw new KVParamMissingValueException(define, df);
+                        throw new UndefinedPosArgException(define, posArgCount);
                     }
                 }
                 else
@@ -97,29 +114,81 @@ namespace CmdParser
                     _Log($"添加参数: {arg}");
                 }
             }
-            else//一般选项参数
+            else if (arg.useEpithet)//别称选项参数
             {
-                var df = define.GetKeyValueParamDefine(arg.name);//获取选项参数定义
-                if (df == null)//缺失参数定义
-                    throw new UndefinedKVArgException(define, arg);
+                var df = define.GetKVParamDefineWithEpithet(arg.name);//获取选项参数定义
 
-                if (!arg.value.active)//如果参数的值未填入
+                if (df == null)//缺失参数定义
                 {
-                    if (df.isMark)//标记型参数, 填入标记值
+                    if (define.allowKvParamRedundant)//允许冗余参数
                     {
-                        arg.value = new Value(df.markValue);
-                        args[arg.name] = arg;
-                        _Log($"添加参数: {arg}");
+                        //冗余参数存入未定义组内
+                        kvArgsRedundant[arg.name] = arg.value;
                     }
-                    else//非标记参数则强制需要填入值
+                    else
                     {
-                        throw new KVParamMissingValueException(define, df);
+                        throw new UndefinedKVArgException(define, arg);
                     }
                 }
                 else
                 {
-                    args[arg.name] = arg;
-                    _Log($"添加参数: {arg}");
+                    if (!arg.value.active)//如果参数的值未填入
+                    {
+                        if (df.isMark)//标记型参数, 填入标记值
+                        {
+                            arg.name = df.name;
+                            arg.value = new Value(df.markValue);
+                            args[arg.name] = arg;
+                            _Log($"添加参数: {arg}");
+                        }
+                        else//非标记参数则强制需要填入值
+                        {
+                            throw new KVParamMissingValueException(define, df);
+                        }
+                    }
+                    else
+                    {
+                        arg.name = df.name;
+                        args[arg.name] = arg;
+                        _Log($"添加参数: {arg}");
+                    }
+                }
+            }
+            else//一般选项参数
+            {
+                var df = define.GetKeyValueParamDefine(arg.name);//获取选项参数定义
+                if (df == null)//缺失参数定义
+                {
+                    if (define.allowKvParamRedundant)//允许冗余参数
+                    {
+                        //冗余参数存入未定义组内
+                        kvArgsRedundant[arg.name] = arg.value;
+                    }
+                    else
+                    {
+                        throw new UndefinedKVArgException(define, arg);
+                    }
+                }
+                else
+                {
+                    if (!arg.value.active)//如果参数的值未填入
+                    {
+                        if (df.isMark)//标记型参数, 填入标记值
+                        {
+                            arg.value = new Value(df.markValue);
+                            args[arg.name] = arg;
+                            _Log($"添加参数: {arg}");
+                        }
+                        else//非标记参数则强制需要填入值
+                        {
+                            throw new KVParamMissingValueException(define, df);
+                        }
+                    }
+                    else
+                    {
+                        args[arg.name] = arg;
+                        _Log($"添加参数: {arg}");
+                    }
                 }
             }
         }

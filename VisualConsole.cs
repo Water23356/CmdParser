@@ -2,6 +2,9 @@
 
 namespace CmdParser
 {
+    /// <summary>
+    /// 虚拟控制台: 集成了指令解释器和执行器
+    /// </summary>
     public class VisualConsole
     {
         private CommandSet _set = new CommandSet();

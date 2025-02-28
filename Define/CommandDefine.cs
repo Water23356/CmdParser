@@ -53,6 +53,16 @@ namespace CmdParser.Define
         /// </summary>
         public Func<CommandExecuter, ArgGroup, Value>? execute;
 
+        /// <summary>
+        /// 是否允许填写冗余的位置参数
+        /// </summary>
+        public bool allowPosParamRedundant { get; set; } = false;
+
+        /// <summary>
+        /// 是否允许填写冗余的键值参数
+        /// </summary>
+        public bool allowKvParamRedundant { get; set; } = false;
+
         #region 容器
 
         /// <summary>
@@ -184,6 +194,19 @@ namespace CmdParser.Define
             subCommands.Add(name, sub);
             return sub;
         }
+        /// <summary>
+        /// 添加子指令
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+
+        public CommandDefine AddSubCommand(string name, string description)
+        {
+            var sub = new CommandDefine(name, description);
+            sub.parent = this;
+            subCommands.Add(name, sub);
+            return sub;
+        }
 
         public IEnumerable<PosParamDefine> PosParamDefines()
         {
@@ -295,7 +318,7 @@ namespace CmdParser.Define
 
             if (missing.Count > 0)
             {
-                throw new MissingRequiredParamException(this,missing.ToArray());
+                throw new MissingRequiredParamException(this, missing.ToArray());
             }
         }
 
