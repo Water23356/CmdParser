@@ -18,6 +18,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample(string[] args)
         {
+            Console.WriteLine("Sample4");
             VisualConsole console = new VisualConsole();
             console.AddCommand("default", "默认指令")
                 .AddParam(new PosParamDefine

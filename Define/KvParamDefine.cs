@@ -54,7 +54,7 @@ namespace CmdParser.Define
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            if (string.IsNullOrEmpty(epithet))
+            if (!string.IsNullOrEmpty(epithet))
             {
                 sb.Append($"-{epithet} ");
             }

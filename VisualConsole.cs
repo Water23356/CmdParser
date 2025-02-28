@@ -3,7 +3,7 @@
 namespace CmdParser
 {
     /// <summary>
-    /// 虚拟控制台: 集成了指令解释器和执行器
+    /// 虚拟控制台: 集成了指令解释器和执行器, 插入解析错误时的提示信息
     /// </summary>
     public class VisualConsole
     {
@@ -213,5 +213,6 @@ namespace CmdParser
         {
             commandSet.RegisterAllSet(true, tag);
         }
+
     }
 }

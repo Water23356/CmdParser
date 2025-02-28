@@ -23,7 +23,7 @@
 
         public override string ToString()
         {
-            return $"str={str}  commandIndex={commandIndex}";
+            return $"[CommandString]: str='{str}'  commandIndex='{commandIndex}'";
         }
 
         public void Clear()

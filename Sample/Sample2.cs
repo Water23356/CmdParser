@@ -12,6 +12,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample()
         {
+            Console.WriteLine("Sample2");
             //通过 VisualConsole 创建一个虚拟控制台对象
             // VisualConsole 内置了一个空的指令集 和 指令解析运行器
             VisualConsole console = new VisualConsole();

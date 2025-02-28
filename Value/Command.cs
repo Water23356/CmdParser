@@ -22,10 +22,17 @@ namespace CmdParser
         /// </summary>
         public string parentFullName = string.Empty;
 
+        public string fullName => parentFullName +' '+ name;
+
         /// <summary>
         /// 携带的参数组
         /// </summary>
         public ArgGroup? args = null;
+
+        /// <summary>
+        /// 结果暂存变量名称
+        /// </summary>
+        public List<string> resultVarName = new();
 
         /// <summary>
         /// 执行指令
@@ -37,7 +44,9 @@ namespace CmdParser
         {
             if (define != null)
             {
-                args?.RunSubCommand(executer);
+                //正式运行前, 需要执行依赖的子指令, 并获取其返回值填充待确认的参数值
+                //或将环境的中的变量填充到参数中
+                args?.FillArgValue(executer);
                 return define.Invoke(args, executer);
             }
             return null;

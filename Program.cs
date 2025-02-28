@@ -4,7 +4,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        RrunSample(6, args);
+        RrunSample(7, args);
     }
 
     private static void RrunSample(int index, string[] args)
@@ -33,6 +33,10 @@ internal class Program
 
             case 6:
                 new Sample6().RunSample();
+                break;
+
+            case 7:
+                new Sample7().RunSample();
                 break;
 
             default:

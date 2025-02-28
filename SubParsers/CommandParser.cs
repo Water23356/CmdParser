@@ -4,17 +4,24 @@ namespace CmdParser.SubParsers
 {
     internal class CommandParser : ParserBase
     {
+        public const char VAR_HEAD = '@';
+        public const char ASSIGN_CHAR = '=';
+        public const char ASSIGN_CHAR2 = ':';
         private Command command = new Command();
         public CommandDefine? define { get; private set; }
         private int state = 0;
         //解析结构: xxx yyy yyy
         // value 以分隔符结尾, body 以分隔符' '结尾
-        //s1: 忽略空白符, x->push, 中断->pop
-        //push->p1
-        //p1: 未定义指令, p1->s2
+        //解析结构: @xxx = xxx yyy yyy
+        //s1: 忽略空白符, x->push(key), @->push(var), 中断->pop
+        //push(key)->p1
+        //push(var)->s3
+        //p1: 未定义指令->error, p1->s2
         //s2: 忽略空白符, x->push, 中断->pop
         //push->p2
         //p2: 为指令头->s2, 其他->s2
+
+        //s3: 忽略空白符, '='->push(p1), 中断->意外中断, x->非法结构
 
         public CommandParser(string name) : base(name)
         {
@@ -33,6 +40,7 @@ namespace CmdParser.SubParsers
             {
                 case 1: S1(c); break;
                 case 2: S2(c); break;
+                case 3: S3(c); break;
                 default:
                     throw new UnknownParseState(this, state);
             }
@@ -47,9 +55,14 @@ namespace CmdParser.SubParsers
                     Pop();
                     break;
 
+                case VAR_HEAD:
+                    state = 3;
+                    Push(ParserBuilder.VAR_STRING);
+                    break;
+
                 default:
-                    Push(ParserBuilder.KEY_FIELD);
                     state = 2;
+                    Push(ParserBuilder.KEY_FIELD);
                     break;
             }
         }
@@ -69,7 +82,25 @@ namespace CmdParser.SubParsers
                     break;
             }
         }
-        
+
+        private void S3(char c)
+        {
+            if (char.IsWhiteSpace(c)) return;//忽略
+            switch (c)
+            {
+                case END:
+                    throw new UnexpectedInterruptionException(c, task!.index);
+
+                case ASSIGN_CHAR:
+                case ASSIGN_CHAR2://赋值符号
+                    state = 1;
+                    break;
+
+                default:
+                    throw new FormatException(c, $"'{ASSIGN_CHAR}'或'{ASSIGN_CHAR2}'");
+            }
+        }
+
         public override void OnSubExit(ParserBase sub, char c)
         {
             switch (sub.name)
@@ -123,6 +154,11 @@ namespace CmdParser.SubParsers
                     S2(c);
                     break;
 
+                case ParserBuilder.VAR_STRING:
+                    command.resultVarName.Add(sub.tmp.VarString.index);
+                    S3(c);
+                    break;
+
                 default:
                     throw new UnexpectedSubparserException(sub);
             }
@@ -131,6 +167,6 @@ namespace CmdParser.SubParsers
         public override void OnExit(char c)
         {
             SetTempValue(command);
-        } 
+        }
     }
 }

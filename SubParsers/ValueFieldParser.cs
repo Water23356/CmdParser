@@ -3,6 +3,7 @@
     public class ValueFieldParser : ParserBase
     {
         public const char COMMAND_HEAD = '%';
+        public const char VAR_HEAD = '@';
         public const char DIC_HEAD = '{';
         public const char ARR_HEAD = '[';
         public const char STR_HEAD = '"';
@@ -68,6 +69,11 @@
                     Push(ParserBuilder.COMMAND_STRING);
                     break;
 
+                case VAR_HEAD:
+                    state = 1;
+                    Push(ParserBuilder.VAR_STRING);
+                    break;
+
                 default:
                     state = 1;
                     Push(ParserBuilder.COMMON_FIELD);
@@ -93,6 +99,7 @@
                 case ParserBuilder.DIC_FIELD:
                 case ParserBuilder.COMMON_FIELD:
                 case ParserBuilder.ARRAY_FIED:
+                case ParserBuilder.VAR_STRING:
                     tmp = sub.tmp;
                     S2(c);
                     break;

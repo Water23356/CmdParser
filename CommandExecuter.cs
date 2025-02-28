@@ -1,4 +1,5 @@
-﻿using CmdParser.Define;
+﻿#define TEST
+using CmdParser.Define;
 
 namespace CmdParser
 {
@@ -9,7 +10,9 @@ namespace CmdParser
     {
         private Dictionary<string, string> commandStrings = new Dictionary<string, string>();
         private Dictionary<string, Command> commands = new Dictionary<string, Command>();
-        private int subStrCount = 0;
+        private Dictionary<string, Value> values = new Dictionary<string, Value>();
+        private uint subStrCount = 0;
+
         /// <summary>
         /// 最近检查过的指令定义
         /// </summary>
@@ -30,6 +33,7 @@ namespace CmdParser
         {
             commandStrings.Clear();
             commands.Clear();
+            values.Clear();
         }
 
         /// <summary>
@@ -57,6 +61,21 @@ namespace CmdParser
         }
 
         /// <summary>
+        /// 解析一组指令字符串并执行
+        /// </summary>
+        /// <param name="commandStrs">命令串组</param>
+        /// <param name="clear">解析组之前是否清空之前的解析缓存</param>
+        public void ParseAndExecute(string[] commandStrs, bool clear = true)
+        {
+            if (clear)
+                Clear();
+            foreach (var str in commandStrs)
+            {
+                ParseAndExecute(str, false);
+            }
+        }
+
+        /// <summary>
         /// 解析指令字符串
         /// </summary>
         /// <param name="commandSet">使用指令集</param>
@@ -80,7 +99,7 @@ namespace CmdParser
         /// </summary>
         /// <param name="commandStr">待解析字符串</param>
         /// <param name="clear">是否清除缓存区</param>
-        /// <param name="commandSet">使用指令集</param>
+        /// <param name="commandSet">使用指令集,为空使用默认指令集</param>
         /// <returns></returns>
         /// <exception cref="MissingDefaultCommandSetException"></exception>
         /// <exception cref="ParseException"></exception>
@@ -114,11 +133,31 @@ namespace CmdParser
         {
             if (commands.TryGetValue(index, out var command))
             {
-                return command.Invoke(this) ?? new Value();
+                var result = command.Invoke(this) ?? Value.Null;
+                foreach (var varName in command.resultVarName)
+                {
+                    values[varName] = result;
+                    _Log($"存入变量: {varName}={result}");
+                }
+                return result;
             }
             MessageOutput.BroadcastLine($"指令不存在: {index}");
-            return new Value();
+            return Value.Null;
         }
+
+        /// <summary>
+        /// 获取命令型参数的值;
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Value GetSubVarValue(string index)
+        {
+            if (values.TryGetValue(index, out var value))
+                return value;
+            MessageOutput.BroadcastLine($"变量不存在: {index}");
+            return Value.Null;
+        }
+
         /// <summary>
         /// 判断是否存在指定命令
         /// </summary>
@@ -130,16 +169,46 @@ namespace CmdParser
         }
 
         /// <summary>
-        /// 添加待解析指令字符串, 缓存区最多允许存放10000条
+        /// 添加待解析指令字符串, 缓存区最多允许存放4,294,967,296条
         /// </summary>
         /// <param name="commandStr">待解析字符串</param>
         /// <returns></returns>
         public string AddCommandStr(string commandStr)
         {
-            subStrCount = (subStrCount + 1) % 10000;
-            string key = subStrCount.ToString();
+            subStrCount = subStrCount + 1;
+            string key = $"@subc:{subStrCount}";
             commandStrings[key] = commandStr;
             return key;
+        }
+        /// <summary>
+        /// 获取一个迭代器: 返回环境内的 变量名和变量值
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<(string, Value)> GetVarValues()
+        {
+            foreach(var value in values)
+            {
+                yield return (value.Key, value.Value);
+            }
+        }
+        /// <summary>
+        /// 获取一个迭代器: 返回环境内的 指令索引和指令串
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<(string, string)> GetCommandStrings()
+        {
+            foreach (var value in commandStrings)
+            {
+                yield return (value.Key, value.Value);
+            }
+        }
+
+        protected static void _Log(string message)
+        {
+#if TEST
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            MessageOutput.BroadcastLine(message);
+#endif
         }
     }
 }

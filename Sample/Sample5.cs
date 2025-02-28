@@ -9,6 +9,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample()
         {
+            Console.WriteLine("Sample5");
             VisualConsole console = new VisualConsole();
             //可以通过 RegisterAllSet 方法来快捷注册指令
             //这样注册指令的代码就可以和执行代码分离开

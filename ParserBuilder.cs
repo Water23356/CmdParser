@@ -15,6 +15,7 @@ namespace CmdParser
         public const string KV_FIELD = "kv_field";
         public const string COMMON_FIELD = "common_field";
         public const string ARRAY_FIED = "array_field";
+        public const string VAR_STRING = "var_string";
 
         public static ParserBase Build(string name)
         {
@@ -52,6 +53,9 @@ namespace CmdParser
 
                 case ARRAY_FIED:
                     return new ArrayParser(name);
+
+                case VAR_STRING:
+                    return new VarStringParser(name);
 
                 default:
                     throw new UnknownParserException(name);

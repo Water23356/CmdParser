@@ -12,6 +12,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample()
         {
+            Console.WriteLine("Sample3");
             VisualConsole console = new VisualConsole();
 
             //参数值支持的类型有:

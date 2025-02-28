@@ -10,6 +10,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample()
         {
+            Console.WriteLine("Sample6");
             // 创建一个控制台对象, 是 VisualConsole 的子类
             // 内置了一个命令输入循环函数, 可以自动解析输入的命令并执行, 适合简单的命令行需求
             // 内置了一个命令 "exit" 用于退出命令模式

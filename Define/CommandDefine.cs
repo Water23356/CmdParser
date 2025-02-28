@@ -1,4 +1,4 @@
-﻿//#define TEST
+﻿#define TEST
 using System.Text;
 
 namespace CmdParser.Define
@@ -297,6 +297,7 @@ namespace CmdParser.Define
                             value = new Value(df.defaultValue),
                             isPosParam = true,
                             useEpithet = false,
+                            isDefaultParam = true,
                         });
                     }
                 }
@@ -319,6 +320,7 @@ namespace CmdParser.Define
                             value = new Value(df.defaultValue),
                             isPosParam = false,
                             useEpithet = false,
+                            isDefaultParam = true,
                         });
                     }
                 }
@@ -339,12 +341,13 @@ namespace CmdParser.Define
         /// <returns></returns>
         public Value? Invoke(ArgGroup? args, CommandExecuter? executer = null)
         {
+            if (args == null)
+                args = new ArgGroup(this);
+
             if (CheckHelp(args))
                 return null;
             CheckArgGroup(args, executer);
 
-            if (args == null)
-                args = new ArgGroup(this);
             try
             {
                 var result = execute?.Invoke(((executer != null) ? executer : new CommandExecuter()), args);
@@ -375,7 +378,7 @@ namespace CmdParser.Define
             }
             foreach (var sub in subCommands.Values)
             {
-                sb.Append($"  {sub.GetHelpInfo()}");
+                sb.Append($"{sub.GetHelpInfo()}");
             }
             return sb.ToString();
         }

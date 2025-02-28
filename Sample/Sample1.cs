@@ -9,6 +9,7 @@ namespace CmdParser.Sample
         /// </summary>
         public void RunSample()
         {
+            Console.WriteLine("Sample1");
             // Sample2 有更加详细的说明版本
             //通过 VisualConsole 创建一个虚拟控制台对象
             VisualConsole console = new VisualConsole();

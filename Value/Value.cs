@@ -125,7 +125,7 @@ namespace CmdParser
         /// <summary>
         /// 获取指令串, 转换失败则返回空串
         /// </summary>
-        public CommandString Cstr
+        public CommandString CommandString
         {
             get
             {
@@ -134,17 +134,16 @@ namespace CmdParser
                 return new CommandString();
             }
         }
-
         /// <summary>
-        /// 转换为指令对象
+        /// 获取变量串, 转换失败则返回空串
         /// </summary>
-        public Command Command
+        public VarString VarString
         {
             get
             {
-                if (value is Command)
-                    return (Command)value;
-                throw new ConvertException($"转换为 Command 类型失败:  stringValue={String}  realType={this.value?.GetType()}");
+                if (value is VarString)
+                    return (VarString)value;
+                return new VarString();
             }
         }
 
@@ -228,34 +227,4 @@ namespace CmdParser
         public static Value Empty { get { return new Value(null); } }
     }
 
-    /// <summary>
-    /// 键值对
-    /// </summary>
-    public class KvPair
-    {
-        public string key = string.Empty;
-        public Value value;
-
-        public void Clear()
-        {
-            key = string.Empty;
-            value = new Value();
-        }
-
-        /// <summary>
-        /// 是否为空
-        /// </summary>
-        public bool IsEmpty
-        {
-            get
-            {
-                return (key == string.Empty);
-            }
-        }
-
-        public override string ToString()
-        {
-            return $"{{{key}:{value}}}";
-        }
-    }
 }

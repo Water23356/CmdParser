@@ -93,7 +93,7 @@ namespace CmdParser
                 }
             }
             //从解析组件中取出结果
-            result = parser.tmp.Command;
+            result = (Command)parser.tmp.value!;
             _LogParseOver();
             return result;
         }

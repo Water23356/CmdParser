@@ -62,6 +62,15 @@ namespace CmdParser
         {
             return kvArgsRedundant[key];
         }
+        /// <summary>
+        /// 判断指定参数是否缺省
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool IsDefaultParam(string key)
+        {
+            return args[key].isDefaultParam;
+        }
 
         public bool Contains(string name)
         {
@@ -69,18 +78,25 @@ namespace CmdParser
         }
 
         /// <summary>
-        /// 运行子指令, 并替换对应的参数值
+        /// 使用子指令或变量填充参数内未确定的值
         /// </summary>
-        public void RunSubCommand(CommandExecuter executer)
+        /// <param name="executer"></param>
+        public void FillArgValue(CommandExecuter executer)
         {
             var list = args.Values.ToArray();
             foreach (var arg in list)
             {
-                var cstr = arg.value.Cstr;
+                var cstr = arg.value.CommandString;
                 if (!cstr.IsEmpty)
                 {
                     var result = executer.Execute(cstr.commandIndex);
                     arg!.value = result;
+                    continue;
+                }
+                var vstr = arg.value.VarString;
+                if (!vstr.IsEmpty)
+                {
+                    arg!.value = executer.GetSubVarValue(vstr.index);
                 }
             }
         }
@@ -251,16 +267,21 @@ namespace CmdParser
         /// <summary>
         /// 是否为位置参数, 否->选项参数
         /// </summary>
-        public bool isPosParam;
+        public bool isPosParam = false;
 
         /// <summary>
         /// 是否使用别称
         /// </summary>
-        public bool useEpithet;
+        public bool useEpithet = false;
+
+        /// <summary>
+        /// 是否缺省该参数
+        /// </summary>
+        public bool isDefaultParam = false;
 
         public override string ToString()
         {
-            return $"<参数>[{name}]={value.ToString()}  isPos: {isPosParam}  epithet: {useEpithet}";
+            return $"<参数>[{name}]={value.ToString()}  isPos: {isPosParam}  epithet: {useEpithet}  isDefaultParam: {isDefaultParam}";
         }
     }
 }
